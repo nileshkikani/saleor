@@ -9,10 +9,21 @@
     margin-top: $spacer * 2;
   }
 
+  &__qrCode {
+    display: flex;
+    margin-left: 880px;
+    @media (max-width: $small-screen) {
+      margin-left: 100px;
+    }
+    @media (max-width: $medium-screen) {
+      margin-left: 560px;
+    }
+  }
+
   &__product {
     display: flex;
     margin-top: $spacer;
-    padding-bottom: $spacer * 5;
+    padding-bottom: $spacer * 2;
 
     @media (max-width: $small-screen) {
       display: block;
@@ -22,7 +33,7 @@
     &__description {
       width: 100%;
       min-height: $spacer * 10;
-      margin-bottom: $spacer * 9; 
+      margin-bottom: $spacer * 9;
     }
 
     &__info {

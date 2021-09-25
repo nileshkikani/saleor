@@ -63,6 +63,7 @@
     "react-intl": "^4.6.9",
     "react-media": "^1.8.0",
     "react-number-format": "^3.6.2",
+    "react-qr-code": "^2.0.2",
     "react-responsive": "^7.0.0",
     "react-router": "^5.2.0",
     "react-select": "^2.4.4",

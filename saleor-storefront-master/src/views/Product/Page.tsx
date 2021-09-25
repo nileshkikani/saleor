@@ -4,11 +4,11 @@ import React from "react";
 import { useMutation } from "react-apollo";
 import Media from "react-media";
 import { generatePath } from "react-router";
-
 import { ProductDescription } from "@components/molecules";
 import { ProductGallery } from "@components/organisms";
 import AddToCartSection from "@components/organisms/AddToCartSection";
 import { paths } from "@paths";
+import QRCode from "react-qr-code";
 
 import {
   Breadcrumbs,
@@ -44,7 +44,6 @@ const Page: React.FC<
   const overlayContext = React.useContext(OverlayContext);
 
   const productGallery: React.RefObject<HTMLDivElement> = React.useRef();
-
   const [variantId, setVariantId] = React.useState("");
   const [addToFavorite] = useMutation(ADD_TO_FAVORITE);
 
@@ -118,6 +117,7 @@ const Page: React.FC<
                   <button onClick={handleAddToFavorite}>
                     &#10084;&#65039;
                   </button>
+
                   <div className="product-page__product__info">
                     <div
                       className={classNames(
@@ -132,6 +132,12 @@ const Page: React.FC<
             }
           </Media>
         </div>
+      </div>
+      <div className="product-page__qrCode">
+        <QRCode
+          value={`http://localhost:3000/product/${product.slug}/`}
+          size={120}
+        />
       </div>
       <div className="container">
         <div className="product-page__product__description">
