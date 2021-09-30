@@ -81,7 +81,7 @@ class PusherPlugin(BasePlugin):
                     configuration = {item["name"]: item["value"]
                                      for item in configuration["configuration"]}
 
-                    print("COnfigration--------", configuration)
+                    # print("COnfigration--------", configuration)
 
                     # while channel_id:
 

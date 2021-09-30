@@ -1,4 +1,5 @@
 import ast
+import environ
 import os.path
 import warnings
 from datetime import timedelta
@@ -21,13 +22,16 @@ from sentry_sdk.integrations.logging import ignore_logger
 
 from . import patched_print_object
 
+env = environ.Env()
+
+environ.Env.read_env()
 
 try:
     from decouple import RepositoryEnv
     file_path = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
     # print("{}/.env".format(file_path))
     for k, v in RepositoryEnv("{}/.env".format(file_path)).data.items():
-        print(k, v)
+        # print(k, v)
         os.environ[k] = v
 except Exception as e:
     # print(e)
@@ -148,7 +152,7 @@ FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 EMAIL_URL = os.environ.get("EMAIL_URL")
 
-print("emuerturjksdnfg  :::::", EMAIL_URL)
+# print("emuerturjksdnfg  :::::", EMAIL_URL)
 SENDGRID_USERNAME = os.environ.get("SENDGRID_USERNAME")
 SENDGRID_PASSWORD = os.environ.get("SENDGRID_PASSWORD")
 if not EMAIL_URL and SENDGRID_USERNAME and SENDGRID_PASSWORD:
@@ -170,8 +174,8 @@ EMAIL_USE_TLS = email_config["EMAIL_USE_TLS"]
 EMAIL_USE_SSL = email_config["EMAIL_USE_SSL"]
 
 EMAIL_BACKEND = email_config["EMAIL_BACKEND"]
-print("EMAILHOSTUSER:::::", EMAIL_FILE_PATH, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD,
-      EMAIL_HOST, EMAIL_PORT, EMAIL_BACKEND, EMAIL_USE_TLS, EMAIL_USE_SSL)
+# print("EMAILHOSTUSER:::::", EMAIL_FILE_PATH, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD,
+#       EMAIL_HOST, EMAIL_PORT, EMAIL_BACKEND, EMAIL_USE_TLS, EMAIL_USE_SSL)
 
 
 # EMAIL_FILE_PATH = email_config["EMAIL_FILE_PATH"]
@@ -186,6 +190,10 @@ print("EMAILHOSTUSER:::::", EMAIL_FILE_PATH, EMAIL_HOST_USER, EMAIL_HOST_PASSWOR
 # If enabled, make sure you have set proper storefront address in ALLOWED_CLIENT_HOSTS.
 ENABLE_ACCOUNT_CONFIRMATION_BY_EMAIL = get_bool_from_env(
     "ENABLE_ACCOUNT_CONFIRMATION_BY_EMAIL", True
+)
+
+ENABLE_ACCOUNT_CONFIRMATION_BY_OTP = get_bool_from_env(
+    "ENABLE_ACCOUNT_CONFIRMATION_BY_OTP", True
 )
 
 ENABLE_SSL = get_bool_from_env("ENABLE_SSL", False)
@@ -235,7 +243,10 @@ TEMPLATES = [
 ]
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = os.environ.get("SECRET_KEY")
+SECRET_KEY = env("SECRET_KEY")
+API_KEY_FOR_MOBILE_OTP=env("API_KEY_FOR_MOBILE_OTP")
+PASSWORD_KEY_FOR_MOBILE_OTP=env("PASSWORD_KEY_FOR_MOBILE_OTP")
+# SECRET_KEY = os.environ.get("SECRET_KEY")
 
 if not SECRET_KEY and DEBUG:
     warnings.warn("SECRET_KEY not configured, using a random temporary key.")
@@ -609,7 +620,7 @@ BUILTIN_PLUGINS = [
 ]
 
 # Plugin discovery
-EXTERNAL_PLUGINS = ["saleor.plugins.pusher.plugin.PusherPlugin"]
+EXTERNAL_PLUGINS = ["saleor.plugins.pusher.plugin.PusherPlugin" ,"saleor.plugins.mobile_otp.plugin.MobileOtpPlugin"]
 installed_plugins = pkg_resources.iter_entry_points("saleor.plugins")
 for entry_point in installed_plugins:
     plugin_path = "{}.{}".format(entry_point.module_name, entry_point.attrs[0])

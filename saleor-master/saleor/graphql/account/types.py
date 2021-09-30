@@ -45,11 +45,11 @@ class AddressInput(graphene.InputObjectType):
     country_area = graphene.String(description="State or province.")
     phone = graphene.String(description="Phone number.")
 
-class WishlistItemType(DjangoObjectType):
+class WishlistItemType(CountableDjangoObjectType):
     class Meta: 
         only_fields = ["id", "wishlist", "product", "variants"]
         description = "Wishlist item."
-        interfaces = [relay.Node]
+        # interfaces = [relay.Node]
         model = WishlistItem
         filter_fields = ["id"]
 

@@ -12,10 +12,12 @@ const accountRegisterMutation = gql`
     $password: String!
     $redirectUrl: String
     $channel: String
+    $phone: String
   ) {
     accountRegister(
       input: {
         email: $email
+        phone: $phone
         password: $password
         redirectUrl: $redirectUrl
         channel: $channel
@@ -24,6 +26,9 @@ const accountRegisterMutation = gql`
       errors {
         field
         message
+      }
+      user {
+        id
       }
       requiresConfirmation
     }

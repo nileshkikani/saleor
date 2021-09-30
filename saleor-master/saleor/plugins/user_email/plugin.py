@@ -363,6 +363,7 @@ class UserEmailPlugin(BasePlugin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         configuration = {item["name"]: item["value"] for item in self.configuration}
+        # print("configrations::",configuration["sender_address"])
         self.config = EmailConfig(
             host=configuration["host"],
             port=configuration["port"],

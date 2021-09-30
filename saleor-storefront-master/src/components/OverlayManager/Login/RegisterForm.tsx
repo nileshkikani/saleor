@@ -4,7 +4,7 @@ import { useMutation } from "react-apollo";
 import FacebookLogin from "react-facebook-login";
 import GoogleLogin from "react-google-login";
 import { IntlShape, useIntl } from "react-intl";
-
+// import { useRouter } from "next/router";
 import { paths } from "@paths";
 import { channelSlug } from "@temp/constants";
 import { commonMessages } from "@temp/intl";
@@ -46,6 +46,7 @@ const showSuccessNotification = (
 const RegisterForm: React.FC<{ hide: () => void }> = ({ hide }) => {
   const alert = useAlert();
   const intl = useIntl();
+  // const router = useRouter();
 
   const [socialRegister] = useMutation(socialRegisterMutation);
 
@@ -135,12 +136,13 @@ const RegisterForm: React.FC<{ hide: () => void }> = ({ hide }) => {
           return (
             <Form
               errors={maybe(() => data.accountRegister.errors, [])}
-              onSubmit={(event, { email, password }) => {
+              onSubmit={(event, { email, password, phone }) => {
                 event.preventDefault();
                 const redirectUrl = `${location.origin}${paths.accountConfirm}`;
                 registerCustomer({
                   variables: {
                     email,
+                    phone,
                     password,
                     redirectUrl,
                     channel: channelSlug,
@@ -153,6 +155,13 @@ const RegisterForm: React.FC<{ hide: () => void }> = ({ hide }) => {
                 autoComplete="email"
                 label={intl.formatMessage(commonMessages.eMail)}
                 type="email"
+                required
+              />
+              <TextField
+                name="phone"
+                autoComplete="phone"
+                label={intl.formatMessage(commonMessages.eMail)}
+                type="text"
                 required
               />
               <TextField

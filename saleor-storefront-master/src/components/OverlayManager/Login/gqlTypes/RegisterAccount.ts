@@ -41,11 +41,12 @@ export interface RegisterAccountVariables {
   password: string;
   redirectUrl?: string | null;
   channel?: string | null;
+  phone?: string | null;
 }
 
 export interface RegisterSocialAccountVariables {
   email: string;
-  googleId?: string|null;
+  googleId?: string | null;
   redirectUrl?: string | null;
   channel?: string | null;
 }

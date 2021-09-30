@@ -173,6 +173,8 @@ class User(PermissionsMixin, ModelWithMetadata, AbstractBaseUser):
     )
     socialId = models.CharField(max_length=256, null=True, blank=True)
     socialType = models.CharField(max_length=256, null=True, blank=True)
+    phone_number = models.CharField(max_length=256, null=True, blank=True)
+    VerificationId = models.CharField(max_length=256, null=True, blank=True)
 
     USERNAME_FIELD = "email"
 

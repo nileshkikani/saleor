@@ -1,10 +1,12 @@
 import graphene
 import jwt
+import random   
+import requests
 from django.conf import settings
 from django.contrib.auth import password_validation
 from django.contrib.auth.tokens import default_token_generator
 from django.core.exceptions import ValidationError
-
+from ....plugins.mobile_otp.plugin import MobileOtpPlugin
 from ....account import events as account_events
 from ....account import models, notifications, utils
 from ....account.error_codes import AccountErrorCode
@@ -21,17 +23,31 @@ from ...core.mutations import BaseMutation, ModelDeleteMutation, ModelMutation
 from ...core.types.common import AccountError
 from ...meta.mutations import MetadataInput
 from ..i18n import I18nMixin
+
 from .base import (
     INVALID_TOKEN,
     BaseAddressDelete,
     BaseAddressUpdate,
     BaseCustomerCreate,
 )
+VerificationId = ""
+
+def verify_otp(otp,userId):
+    user = models.User.objects.all().filter(pk=userId)
+    vId = [i.VerificationId for i in user]
+    # print(vId[0])
+    # print(otp)
+
+    if vId[0] == otp:
+        user = models.User.objects.get(pk=userId)
+        user.is_active = True
+        user.save()
 
 
 class AccountRegisterInput(graphene.InputObjectType):
     # username = graphene.String()
     email = graphene.String(description="The email address of the user.", required=True)
+    phone = graphene.String(description="The Mobile number of user")
     password = graphene.String(description="Password.", required=True)
     redirect_url = graphene.String(
         description=(
@@ -74,41 +90,32 @@ class AccountSocialRegisterInput(graphene.InputObjectType):
         )
     )
 
+class MobileOptInput(graphene.InputObjectType):
+    otp = graphene.String(description="Otp for register id.")
+    userId = graphene.ID(description="User Id")
 
-# class SocialLoginInput(graphene.InputObjectType):
-#     email = graphene.String(description="The email address of the user.", required=True)
-#     googleId = graphene.String(description="social register")
+class MobileOtp(ModelMutation):
+    class Arguments:
+        input = MobileOptInput(
+            description="Fields required to create a user."
+        )
 
+    class Meta:
+        description = "Register a new user."
+        model = models.User
+        exclude = ["password"]
+        error_type_class = AccountError
+        error_type_field = "account_errors"
 
-# class SocialLogin(BaseMutation):
-#     print("social lofin::")
-
-#     email = graphene.Field(User, description="abcd")
-#     print("email_____", email)
-
-#     # class Arguments:
-#     #     input = SocialLoginInput(description="Fields required to create a user.")
-#     #     print("email******", input.email)
-
-#     # @classmethod
-#     # def clean_input(cls, info, instance, data, input_cls=None):
-#     #     print("clean input...........................")
-#     #     data["metadata"] = {
-#     #         item["key"]: item["value"] for item in data.get("metadata") or []
-#     #     }
-#     #     print("data-------", data)
-
-#     #     return super().clean_input(info, instance, data, input_cls=None)
-
-#     class Meta:
-#         description = "Verify external authentication data by plugin."
-#         exclude = ["password"]
-#         error_type_class = AccountError
-#         error_type_field = "account_errors"
+    @classmethod
+    def mutate(cls, root, info, input):
+        # print("userId",input["userId"])
+        if input["otp"] and input["userId"]:
+            verify_otp(input["otp"] ,input["userId"] )
 
 
 class SocialRegister(ModelMutation):
-    print("Social register call::")
+    # print("Social register call::")
 
     class Arguments:
         input = AccountSocialRegisterInput(
@@ -130,7 +137,7 @@ class SocialRegister(ModelMutation):
     def mutate(cls, root, info, **data):
         response = super().mutate(root, info, **data)
         response.requires_confirmation = settings.ENABLE_ACCOUNT_CONFIRMATION_BY_EMAIL
-        print("response ::" ,response)
+        # print("response ::" ,response)
         return response
 
     @classmethod
@@ -174,7 +181,7 @@ class SocialRegister(ModelMutation):
     def save(cls, info,user, cleaned_input):
         password = cleaned_input["password"]
         user.set_password(password)
-        print("Save Funaction call......")
+        # print("Save Funaction call......")
         if settings.ENABLE_ACCOUNT_CONFIRMATION_BY_EMAIL:
             user.is_active = False
             user.save()
@@ -219,7 +226,7 @@ class AccountRegister(ModelMutation):
             item["key"]: item["value"] for item in data.get("metadata") or []
         }
         if not settings.ENABLE_ACCOUNT_CONFIRMATION_BY_EMAIL:
-            print("clean Input :::::")
+            # print("clean Input :::::")
             return super().clean_input(info, instance, data, input_cls=None)
         elif not data.get("redirect_url"):
             raise ValidationError(
@@ -257,9 +264,17 @@ class AccountRegister(ModelMutation):
     @classmethod
     @traced_atomic_transaction()
     def save(cls, info, user, cleaned_input):
+        phone_number = cleaned_input["phone"]
+        if phone_number:
+            user.phone_number = phone_number
+        print("phone number",phone_number)
         password = cleaned_input["password"]
         user.set_password(password)
+        # global VerificationId
+        # VerificationId = mobile_opt(phone_number)
         if settings.ENABLE_ACCOUNT_CONFIRMATION_BY_EMAIL:
+            # if VerificationId:
+            #     user.VerificationId = VerificationId
             user.is_active = False
             user.save()
             notifications.send_account_confirmation(
@@ -268,7 +283,17 @@ class AccountRegister(ModelMutation):
                 info.context.plugins,
                 channel_slug=cleaned_input["channel"],
             )
+        if settings.ENABLE_ACCOUNT_CONFIRMATION_BY_OTP:
+            user.is_active = False
+            user.save()
+            verifyId = MobileOtpPlugin.send_mobile_otp(user, phone_number)
+            if verifyId:
+                user.VerificationId = verifyId
+                user.save()
+          
         else:
+            if VerificationId:
+                user.VerificationId = VerificationId
             user.save()
         account_events.customer_account_created_event(user=user)
         info.context.plugins.customer_created(customer=user)

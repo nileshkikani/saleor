@@ -20,7 +20,8 @@ from .mutations.account import (
     AccountUpdate,
     ConfirmEmailChange,
     RequestEmailChange,
-    SocialRegister
+    SocialRegister,
+    MobileOtp
 )
 from .mutations.authentication import (
     CreateToken,
@@ -194,6 +195,8 @@ class AccountQueries(graphene.ObjectType):
 
     #     return resolve_social_login(self,info)
 
+class OptVerifyMutation(graphene.ObjectType):
+     opt_verification = MobileOtp.Field()
 
 class AccountMutations(graphene.ObjectType):
     # Base mutations
@@ -229,8 +232,7 @@ class AccountMutations(graphene.ObjectType):
 
     #####
     social_create_token = SocialCreateToken.Field()
-    account_social_Register = SocialRegister.Field()
-
+    account_social_Register = SocialRegister.Field()   
     # Staff mutations
     address_create = AddressCreate.Field()
     address_update = AddressUpdate.Field()
