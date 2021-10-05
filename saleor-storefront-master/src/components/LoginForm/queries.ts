@@ -26,3 +26,16 @@ export const SocialTokenVerifyMutation = gql`
     }
   }
 `;
+
+export const OneSignalPersonIdRegister = gql`
+  mutation addUserPlayerId($playerId: String, $userId: ID!) {
+    oneSignalUser(playerId: $playerId, userId: $userId) {
+      errors {
+        message
+      }
+      user {
+        email
+      }
+    }
+  }
+`;

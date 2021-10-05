@@ -18,6 +18,7 @@ import {
 } from "./queries";
 
 import "./scss/index.scss";
+import { useRouter } from "next/router";
 
 const showSuccessNotification = (
   data: RegisterAccount,
@@ -29,6 +30,7 @@ const showSuccessNotification = (
 
   if (successful) {
     hide();
+    localStorage.setItem("registeredUserId", data.accountRegister.user.id);
     alert.show(
       {
         title: data.accountRegister.requiresConfirmation
@@ -46,7 +48,7 @@ const showSuccessNotification = (
 const RegisterForm: React.FC<{ hide: () => void }> = ({ hide }) => {
   const alert = useAlert();
   const intl = useIntl();
-  // const router = useRouter();
+  const router = useRouter();
 
   const [socialRegister] = useMutation(socialRegisterMutation);
 
@@ -130,7 +132,10 @@ const RegisterForm: React.FC<{ hide: () => void }> = ({ hide }) => {
   return (
     <>
       <TypedAccountRegisterMutation
-        onCompleted={data => showSuccessNotification(data, hide, alert, intl)}
+        onCompleted={data => {
+          showSuccessNotification(data, hide, alert, intl)
+          router.push(paths.accountOtpConfirm)
+        }}
       >
         {(registerCustomer, { loading, data }) => {
           return (
@@ -160,7 +165,7 @@ const RegisterForm: React.FC<{ hide: () => void }> = ({ hide }) => {
               <TextField
                 name="phone"
                 autoComplete="phone"
-                label={intl.formatMessage(commonMessages.eMail)}
+                label={intl.formatMessage(commonMessages.phone)}
                 type="text"
                 required
               />

@@ -23,6 +23,7 @@ export interface RegisterAccount_accountRegister_errors {
 export interface RegisterAccount_accountRegister {
   __typename: "AccountRegister";
   errors: RegisterAccount_accountRegister_errors[];
+  user?: any;
   /**
    * Informs whether users need to confirm their email address.
    */

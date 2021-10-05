@@ -40,6 +40,7 @@ import {
 declare global {
   interface Window {
     __APOLLO_CLIENT__: any;
+    OneSignal: any;
   }
 }
 const attachClient = async () => {
@@ -79,16 +80,68 @@ const App = ({
   messages,
   shopConfig,
 }: AppProps) => {
-  React.useEffect(() => {
-    const beamsClient = new PusherPushNotifications.Client({
-      instanceId: "966abe4b-b22b-4e37-94d8-60b66942efeb",
-    });
+  // React.useEffect(() => {
+  //   const beamsClient = new PusherPushNotifications.Client({
+  //     instanceId: "966abe4b-b22b-4e37-94d8-60b66942efeb",
+  //   });
 
-    beamsClient
-      .start()
-      .then(() => beamsClient.addDeviceInterest("hello"))
-      .then(() => console.log("Successfully registered and subscribed!"))
-      .catch(console.error);
+  //   beamsClient
+  //     .start()
+  //     .then(() => beamsClient.addDeviceInterest("hello"))
+  //     .then(() => console.log("Successfully registered and subscribed!"))
+  //     .catch(console.error);
+  // }, []);
+
+  let OneSignal
+  if (process.browser) {
+    window.OneSignal = window.OneSignal || [];
+    OneSignal = window.OneSignal;
+  }
+
+  React.useEffect(async() => {
+    OneSignal.push(()=> {
+      OneSignal.init(
+        {
+          appId: "037d0b62-81b6-4768-9154-943d45a67a51",
+          allowLocalhostAsSecureOrigin: true,
+          safari_web_id: "web.onesignal.auto.5ecc7e9f-2540-4c26-bcd6-80ea5ac40604",
+          promptOptions: {
+            slidedown: {
+              enabled: true,
+              actionMessage: "We'd like to show you notifications for the latest news and updates about the following categories.",
+              acceptButtonText: "OMG YEEEEESS!",
+              cancelButtonText: "NAHHH",
+              categories: {
+                  tags: [
+                      {
+                        tag: "react",
+                        label: "Stay update with latest Offers",
+                      },
+                      {
+                        tag: "angular",
+                        label: "Get Community updates",
+                      },
+                  ]
+              }     
+          } 
+        },
+        welcomeNotification: {
+          "title": "One Signal",
+          "message": "Thanks for subscribing!",
+        } 
+      },
+      //Automatically subscribe to the new_app_version tag
+      OneSignal.sendTag("new_app_version", "new_app_version", tagsSent => {
+        // Callback called when tag has finished sending
+        console.log('new_app_version TAG SENT', tagsSent);
+      }).then(async()=>{
+        const personId = await OneSignal.getUserId()
+          if(personId && personId !== null){
+            localStorage.setItem("personId", personId);
+          }
+        })
+      );
+    });
   }, []);
 
   return (
@@ -101,6 +154,7 @@ const App = ({
         <link rel="manifest" href="/manifest.json" />
 
         <script src="https://js.pusher.com/beams/1.0/push-notifications-cdn.js" />
+        <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async="" />
       </Head>
       <ThemeProvider theme={defaultTheme}>
         <AlertProvider

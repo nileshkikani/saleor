@@ -6,6 +6,7 @@ const checkoutBaseUrl = `${baseUrl}checkout/`;
 export const paths = {
   notFound: `${baseUrl}404`,
   accountConfirm: `${baseUrl}account-confirm`,
+  accountOtpConfirm: `${baseUrl}account-confirm-otp`,
   cart: `${baseUrl}cart`,
   category: `${baseUrl}category/${slugUrl}`,
   collection: `${baseUrl}collection/${slugUrl}`,

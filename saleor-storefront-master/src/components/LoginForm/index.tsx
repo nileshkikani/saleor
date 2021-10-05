@@ -10,7 +10,7 @@ import { demoMode } from "@temp/constants";
 import { commonMessages } from "@temp/intl";
 
 import { Button, Form, TextField } from "..";
-import { SocialCreateToken, SocialTokenVerifyMutation } from "./queries";
+import { OneSignalPersonIdRegister, SocialCreateToken, SocialTokenVerifyMutation } from "./queries";
 
 import "./scss/index.scss";
 
@@ -26,6 +26,7 @@ const LoginForm: React.FC<ILoginForm> = ({ hide }) => {
   const [errors, setErrors] = React.useState(null);
   const [socialTokenForUserVerification] = useMutation(SocialCreateToken);
   const [verifyTokenOfUser] = useMutation(SocialTokenVerifyMutation);
+  const [oneSignalPersonId] = useMutation(OneSignalPersonIdRegister);
 
   const handleOnSubmit = async (evt, { email, password }) => {
     evt.preventDefault();
@@ -35,6 +36,10 @@ const LoginForm: React.FC<ILoginForm> = ({ hide }) => {
     if (dataError?.error) {
       setErrors(dataError.error);
     } else if (data && hide) {
+      const personId = localStorage.getItem("personId") || null;
+      if(personId && personId !== null){
+        sendOneSignalPersonId(data.id, personId)
+      }
       setErrors(null);
       hide();
     }
@@ -52,6 +57,18 @@ const LoginForm: React.FC<ILoginForm> = ({ hide }) => {
     const { id } = response;
     const password = response.id;
     verifySocialUser(email, id, password);
+  };
+
+  const sendOneSignalPersonId = async (
+    userId: string,
+    playerId: string,
+  ) => {
+    const { data } = await oneSignalPersonId({
+      variables: {
+        playerId,
+        userId,
+      },
+    });
   };
 
   const verifySocialUser = async (
